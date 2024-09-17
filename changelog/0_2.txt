@@ -1,0 +1,2 @@
+-- removed dependancy on yt_dlp:
+    -- This was running slowly and I could achieve the same result with the unofficial youtube music API.
