@@ -7,6 +7,17 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from ytmusicapi import YTMusic
 
+class bcolors:
+	GREEN = '\033[92m'
+	CYAN = '\033[96m'
+	PINK = '\033[35m'
+	ENDC = '\033[0m'
+	RED = '\033[31m'
+
+def add_color(text, color_to_add=bcolors.GREEN):
+    return color_to_add+text+bcolors.ENDC
+    
+
 ytm = YTMusic()
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=environ["SPOTIPY_CLIENT_ID"],
                                                client_secret=environ["SPOTIPY_CLIENT_SECRET"],
@@ -27,6 +38,7 @@ def main():
         print("usage: python addax.py [Playlist URL]")
     elif len(argv) == 1:
         URL = 'https://music.youtube.com/playlist?list=PLciqDR73n0emWF1k5LVgEzeRYAAkDVpG9'
+        print(f'No album input, using default of {add_color(URL,bcolors.CYAN)}.') 
     else:
         URL = argv[1]
     
@@ -42,7 +54,6 @@ def main():
                 known.albums.append(tuple(line.split(',')))
 
     clear(album_urls)
-    print(url_to_list_id(URL))
     songs=ytm.get_playlist(url_to_list_id(URL),None)['tracks']
     
     
@@ -65,18 +76,18 @@ def main():
                 if add_if_unknown(result[0:2]):
                     albums_to_output.append(result[2])
             else:
-                print(f'{artist} - {remove_junk(title)} did not find an album, discarding.')
+                print(f'{add_color(artist,bcolors.RED)} - {add_color(remove_junk(title),bcolors.RED)} did not find an album, discarding.')
                 NA+=1
     clear(FILE)
     f = open(FILE, 'w')
     print(f'writing found albums to {FILE}...')
     for album in known_albums:
-        print(f"writing {album} to {FILE}")
+        print(f"writing {add_color(album[0])} - {add_color(album[1],bcolors.PINK)} to {FILE}")
         f.write(f"('{'\',\''.join(album)}')\n")
     f.close()
     with open(album_urls,'w') as f:
         for url in albums_to_output:
-            print(f'Writing {url} to {album_urls}')
+            print(f'Writing {add_color(url,bcolors.CYAN)} to {album_urls}')
             f.write(f'{url}\n')
     print('Done!')
     print(f'{success+duplicates} songs successfully parsed, {success} albums found, {duplicates} duplicate albums and and {NA} unable to find songs discarded.')
@@ -86,11 +97,11 @@ def add_if_unknown(result):
     success = success
     if result not in known_albums:
         known_albums.append(result)
-        print(f"Adding {result} to albums")
+        print(f"Adding {add_color(result[0])}, {add_color(result[1],bcolors.PINK)} to albums")
         success+=1
         return True
     else:
-        print(f"{result} found in known albums, discarding.")
+        print(f"{add_color(','.join(result),bcolors.RED)} found in known albums, discarding.")
         duplicates+=1
         return False
 

@@ -1,1 +1,2 @@
--- added colors to ytmusic.py for easier reading
+-- added colors to album_to_ytmusic.py for easier reading
+-- added colors to addax.py for easier reading
