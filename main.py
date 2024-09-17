@@ -1,9 +1,7 @@
 import json
 import yt_dlp
 import re
-from os import environ
-
-
+from os import environ,path
 
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
@@ -16,6 +14,7 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=environ["SPOTIPY_CLIENT
 #raaar global variables
 #raaar im a bad programmer
 NA=0
+duplicates=0
 success=0
 known_albums=[]
 
@@ -25,16 +24,16 @@ def main():
     URL = 'https://music.youtube.com/playlist?list=PLciqDR73n0emWF1k5LVgEzeRYAAkDVpG9'
     FILE= 'out.txt'
 
-    global NA,success,known_albums
+    global NA,success,known_albums,duplicates
 
     album_urls='todl.txt'
     known='known.txt'
 
     #iterate through known albums file and append to variable:
-    with open(known) as f:
-        for line in f:
-
-            known.albums.append(tuple(line.split(',')))
+    if path.exists(known):
+        with open(known) as f:
+            for line in f:
+                known.albums.append(tuple(line.split(',')))
 
     clear(album_urls)
     clear(FILE)
@@ -105,12 +104,10 @@ def main():
             print(f'Writing {url} to {album_urls}')
             f.write(f'{url}\n')
     print('Done!')
-    print(f'{success} albums found and {NA} songs discarded.')
+    print(f'{success+duplicates} songs successfully parsed, {success} albums found, {duplicates} duplicate albums and and {NA} unable to find songs discarded.')
 
 def add_if_unknown(result):
-    global NA,success
-    global known_albums
-    NA = NA
+    global duplicates,success
     success = success
     if result not in known_albums:
         known_albums.append(result)
@@ -119,7 +116,7 @@ def add_if_unknown(result):
         return True
     else:
         print(f"{result} found in known albums, discarding.")
-        NA+=1
+        duplicates+=1
         return False
 
 def remove_junk(text):
