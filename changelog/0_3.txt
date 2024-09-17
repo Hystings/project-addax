@@ -1,0 +1,1 @@
+-- added colors to ytmusic.py for easier reading
